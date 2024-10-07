@@ -1,10 +1,11 @@
-from flask import Flask
+from fastapi import FastAPI
+import uvicorn
 
-app = Flask(__name__)
+app = FastAPI()
 
-@app.route('/')
-def home():
+@app.get('/')
+async def home():
     return {"message" : "Hello, Azure!"}
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    uvicorn.run(app, host='0.0.0.0', port=8000)
