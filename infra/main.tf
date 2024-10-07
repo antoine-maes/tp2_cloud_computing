@@ -114,43 +114,32 @@ resource "azurerm_linux_web_app" "webapp" {
   resource_group_name   = azurerm_resource_group.example.name
   service_plan_id       = azurerm_service_plan.appserviceplan.id
   https_only            = true
-  site_config { 
-    minimum_tls_version = "1.2"
+
+  site_config {
+    application_stack {
+      python_version = "3.9"
+    }
+    always_on = true
+
+    app_command_line = "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app"
+  }
+
+   app_settings = {
+    SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
+
+  }
+
+  timeouts {
+    create = "30m"
+    update = "30m"
   }
 }
 
 #  Deploy code from a public GitHub repo
 resource "azurerm_app_service_source_control" "sourcecontrol" {
   app_id             = azurerm_linux_web_app.webapp.id
-  repo_url           = "https://github.com/Azure-Samples/nodejs-docs-hello-world"
-  branch             = "master"
+  repo_url           = "https://github.com/antoine-maes/tp2_cloud_computing.git"
+  branch             = "main"
   use_manual_integration = true
-  use_mercurial      = false
 }
-
-
-# resource "azurerm_app_service_plan" "example" {
-#   name                = "maesmyAppServicePlan"
-#   location            = azurerm_resource_group.example.location
-#   resource_group_name = azurerm_resource_group.example.name
-#   sku {
-#     tier = "Free"
-#     size = "F1"
-#   }
-# }
-
-# resource "azurerm_linux_web_app" "example" {
-#   name                = "maesmyFlaskApp"
-#   location            = azurerm_resource_group.example.location
-#   resource_group_name = azurerm_resource_group.example.name
-#   service_plan_id     = azurerm_app_service_plan.example.id
-#   site_config {
-#     always_on = false
-#   }
-
-#   app_settings = {
-#     "WEBSITE_RUN_FROM_PACKAGE" = "https://${azurerm_storage_account.example.name}.blob.core.windows.net/${azurerm_storage_container.example.name}/${azurerm_storage_blob.example.name}"
-#   }
-# }
-
 
